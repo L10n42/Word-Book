@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">WordBook</string>
+    <string name="btn_new_card">New Card</string>
+    <string name="card_count">Contains: 1 card</string>
+    <string name="cards_count">Contains: %d cards</string>
+    <string name="collections">Collections</string>
+    <string name="search">Search</string>
 </resources>
