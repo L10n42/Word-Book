@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.collections.components
+package com.kappdev.wordbook.main_feature.presentation.common
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState

@@ -27,13 +27,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.SubcomposeAsyncImage
 import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.presentation.common.CardElevation
+import com.kappdev.wordbook.core.presentation.common.CardShape
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
 
 @Composable
 fun CollectionCard(
     info: CollectionInfo,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(16.dp),
     onMore: () -> Unit,
     onNewCard: () -> Unit,
     onClick: () -> Unit
@@ -42,9 +43,9 @@ fun CollectionCard(
 
     ConstraintLayout(
         modifier
-            .shadow(elevation = 8.dp, shape = shape)
-            .background(backgroundColor, shape)
-            .clip(shape)
+            .shadow(elevation = CardElevation, shape = CardShape)
+            .background(backgroundColor, CardShape)
+            .clip(CardShape)
             .clickable(onClick = onClick)
     ) {
         val (name, description, button, cardsCount, more, background) = createRefs()

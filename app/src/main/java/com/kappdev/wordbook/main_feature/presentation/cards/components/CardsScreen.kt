@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.collections.components
+package com.kappdev.wordbook.main_feature.presentation.cards.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,19 +15,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.kappdev.wordbook.core.presentation.navigation.Screen
-import com.kappdev.wordbook.main_feature.presentation.collections.CollectionsViewModel
+import com.kappdev.wordbook.main_feature.presentation.cards.CardsViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.AnimatedFAB
 
 @Composable
-fun CollectionsScreen(
-    navController: NavController,
-    viewModel: CollectionsViewModel = viewModel()
+fun CardsScreen(
+    viewModel: CardsViewModel = viewModel()
 ) {
+
     Scaffold(
         topBar = {
-            CollectionsTopBar()
+            CardsTopBar(
+                collectionName = "Animals",
+                navigateBack = {  },
+                openOptions = {  },
+                openSearch = {  }
+            )
         },
         floatingActionButton = {
             AnimatedFAB(text = "New", icon = Icons.Rounded.Add) {
@@ -43,15 +46,11 @@ fun CollectionsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(viewModel.collections, { it.id }) { collectionInfo ->
-                CollectionCard(
-                    info = collectionInfo,
+            items(viewModel.cards, { it.id }) { card ->
+                TermCard(
+                    card = card,
                     modifier = Modifier.fillMaxWidth(),
-                    onNewCard = {},
-                    onClick = {
-                        navController.navigate(Screen.Cards.route)
-                    },
-                    onMore = {}
+                    onClick = {  }
                 )
             }
         }
