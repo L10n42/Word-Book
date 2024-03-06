@@ -1,9 +1,12 @@
 package com.kappdev.wordbook.main_feature.presentation.collections.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.Button
@@ -13,10 +16,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +33,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.CardElevation
 import com.kappdev.wordbook.core.presentation.common.CardShape
+import com.kappdev.wordbook.core.presentation.common.PressedCardElevation
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
 
 @Composable
@@ -40,13 +45,20 @@ fun CollectionCard(
     onClick: () -> Unit
 ) {
     val backgroundColor = info.color ?: MaterialTheme.colorScheme.surface
+    val interactionSource = remember { MutableInteractionSource() }
+    val isCardPressed by interactionSource.collectIsPressedAsState()
+
+    val cardElevation by animateDpAsState(
+        targetValue = if (isCardPressed) PressedCardElevation else CardElevation,
+        label = "Card Elevation"
+    )
 
     ConstraintLayout(
         modifier
-            .shadow(elevation = CardElevation, shape = CardShape)
+            .shadow(elevation = cardElevation, shape = CardShape)
             .background(backgroundColor, CardShape)
             .clip(CardShape)
-            .clickable(onClick = onClick)
+            .clickable(interactionSource, indication = LocalIndication.current, onClick = onClick)
     ) {
         val (name, description, button, cardsCount, more, background) = createRefs()
 

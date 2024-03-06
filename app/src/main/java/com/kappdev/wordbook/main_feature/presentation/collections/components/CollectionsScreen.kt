@@ -31,7 +31,7 @@ fun CollectionsScreen(
         },
         floatingActionButton = {
             AnimatedFAB(text = "New", icon = Icons.Rounded.Add) {
-
+                navController.navigate(Screen.AddEditCollection.route)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface

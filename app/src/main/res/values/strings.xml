@@ -5,4 +5,5 @@
     <string name="cards_count">Contains: %d cards</string>
     <string name="collections">Collections</string>
     <string name="search">Search</string>
+    <string name="card_color">Card color</string>
 </resources>

@@ -38,6 +38,8 @@ import com.kappdev.wordbook.core.domain.model.Card
 import com.kappdev.wordbook.core.presentation.common.CardElevation
 import com.kappdev.wordbook.core.presentation.common.CardShape
 import com.kappdev.wordbook.core.presentation.common.Speaker
+import com.kappdev.wordbook.main_feature.presentation.common.ErrorImage
+import com.kappdev.wordbook.main_feature.presentation.common.LoadingImage
 
 @Composable
 fun TermCard(
@@ -146,51 +148,9 @@ private fun CardImage(
             .clip(shape),
         contentScale = ContentScale.Crop,
         contentDescription = "Card Image",
-        error = { ErrorImage() },
-        loading = { LoadingImage() }
+        error = { ErrorImage(Modifier.fillMaxSize()) },
+        loading = { LoadingImage(Modifier.fillMaxSize()) }
     )
-}
-
-@Composable
-private fun LoadingImage() {
-    ImagePlaceholder(imageRes = R.drawable.art_dreamer) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            strokeWidth = 1.dp,
-            strokeCap = StrokeCap.Round,
-            modifier = Modifier.size(14.dp)
-        )
-    }
-}
-
-@Composable
-private fun ErrorImage() {
-    ImagePlaceholder(imageRes = R.drawable.art_images) {
-        Text(
-            text = "Error.",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 10.sp
-        )
-    }
-}
-
-@Composable
-private fun ImagePlaceholder(
-    @DrawableRes imageRes: Int,
-    additionalContent: @Composable () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = "Image Placeholder",
-            modifier = Modifier.fillMaxSize(0.7f)
-        )
-        additionalContent()
-    }
 }
 
 @Composable

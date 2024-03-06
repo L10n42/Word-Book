@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.kappdev.wordbook.main_feature.presentation.add_edit_collection.components.AddEditCollectionScreen
 import com.kappdev.wordbook.main_feature.presentation.cards.components.CardsScreen
 import com.kappdev.wordbook.main_feature.presentation.collections.components.CollectionsScreen
 
@@ -25,6 +26,12 @@ fun NavGraph(
             Screen.Cards.route
         ) {
             CardsScreen()
+        }
+
+        composable(
+            Screen.AddEditCollection.route
+        ) {
+            AddEditCollectionScreen(navController)
         }
     }
 }
