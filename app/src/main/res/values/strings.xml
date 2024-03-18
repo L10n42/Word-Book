@@ -32,4 +32,6 @@
     <string name="flashcards">Flashcards</string>
     <string name="tests">Tests</string>
     <string name="writing">Writing</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 </resources>

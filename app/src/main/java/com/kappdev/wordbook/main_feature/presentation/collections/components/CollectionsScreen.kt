@@ -13,16 +13,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.presentation.common.AlertSheet
 import com.kappdev.wordbook.core.presentation.navigation.NavConst
 import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.core.presentation.navigation.putArg
@@ -37,6 +36,7 @@ fun CollectionsScreen(
     viewModel: CollectionsViewModel = hiltViewModel()
 ) {
     val (optionsCollection, openOptions) = remember { mutableStateOf<CollectionInfo?>(null) }
+    var (deleteCollection, confirmDeletion) = remember { mutableStateOf<CollectionInfo?>(null) }
 
     if (optionsCollection != null) {
         CollectionOptions(
@@ -47,8 +47,20 @@ fun CollectionsScreen(
                     is Option.Edit -> navController.navigate(
                         Screen.AddEditCollection.route.putArg(NavConst.COLLECTION_ID, optionsCollection.id, true)
                     )
+                    is Option.Delete -> confirmDeletion(optionsCollection)
                     else -> { /* TODO */ }
                 }
+            }
+        )
+    }
+
+    if (deleteCollection != null) {
+        AlertSheet(
+            title = "Delete collection",
+            message = "Are you sure you want to delete this collection and all its cards permanently?",
+            onDismiss = { confirmDeletion(null) },
+            onPositive = {
+                confirmDeletion(null)
             }
         )
     }
