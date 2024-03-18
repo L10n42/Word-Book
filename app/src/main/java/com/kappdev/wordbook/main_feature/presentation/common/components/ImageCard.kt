@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.common
+package com.kappdev.wordbook.main_feature.presentation.common.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -41,11 +40,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.FieldShape
+import com.kappdev.wordbook.main_feature.domain.util.Image
 import kotlinx.coroutines.delay
 
 @Composable
 fun ImageCard(
-    image: String?,
+    image: Image?,
     title: String,
     modifier: Modifier = Modifier,
     onPick: () -> Unit,
@@ -88,10 +88,10 @@ fun ImageCard(
 
 @Composable
 private fun AnimatedImageContent(
-    image: String?,
+    image: Image?,
     modifier: Modifier = Modifier
 ) {
-    var imageToDisplay by remember { mutableStateOf<String?>(null) }
+    var imageToDisplay by remember { mutableStateOf<Image?>(null) }
 
     LaunchedEffect(image) {
         if (image != null) {
@@ -117,7 +117,7 @@ private fun AnimatedImageContent(
         )
     ) {
         SubcomposeAsyncImage(
-            model = imageToDisplay,
+            model = imageToDisplay?.model,
             modifier = Modifier
                 .background(
                     color = MaterialTheme.colorScheme.background.copy(0.5f),

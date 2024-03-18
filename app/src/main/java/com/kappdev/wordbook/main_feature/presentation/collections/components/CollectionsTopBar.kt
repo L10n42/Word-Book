@@ -2,7 +2,6 @@ package com.kappdev.wordbook.main_feature.presentation.collections.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
@@ -18,10 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,7 +28,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.kappdev.wordbook.R
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -65,6 +61,7 @@ fun CollectionsTopBar(
         var searchJob = remember<Job?> { null }
         var searchArg by remember { mutableStateOf("") }
         var isSearching by remember { mutableStateOf(false) }
+        var optionsOpened by remember { mutableStateOf(false) }
 
         suspend fun search() {
             isSearching = true
@@ -83,7 +80,8 @@ fun CollectionsTopBar(
         SearchBox(
             value = searchArg,
             isSearching = isSearching,
-            openOptions = {  },
+            optionsOpened = optionsOpened,
+            openOptions = { optionsOpened = !optionsOpened },
             onValueChange = { searchArg = it },
             modifier = Modifier.constrainAs(searchBar) {
                 end.linkTo(parent.end, 16.dp)

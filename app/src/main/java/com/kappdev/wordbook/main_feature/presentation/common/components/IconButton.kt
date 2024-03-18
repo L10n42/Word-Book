@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.common
+package com.kappdev.wordbook.main_feature.presentation.common.components
 
 import androidx.compose.material.Icon
 import androidx.compose.material3.MaterialTheme

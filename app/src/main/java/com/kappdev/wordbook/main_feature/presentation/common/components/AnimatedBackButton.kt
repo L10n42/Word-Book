@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.common
+package com.kappdev.wordbook.main_feature.presentation.common.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState

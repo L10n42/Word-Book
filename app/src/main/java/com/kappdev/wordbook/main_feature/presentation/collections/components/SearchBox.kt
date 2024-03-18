@@ -1,10 +1,17 @@
 package com.kappdev.wordbook.main_feature.presentation.collections.components
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +45,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.KeyboardHiddenEffect
 
@@ -47,6 +52,7 @@ import com.kappdev.wordbook.core.presentation.common.KeyboardHiddenEffect
 fun SearchBox(
     value: String,
     isSearching: Boolean,
+    optionsOpened: Boolean,
     modifier: Modifier = Modifier,
     openOptions: () -> Unit,
     onValueChange: (String) -> Unit
@@ -69,16 +75,19 @@ fun SearchBox(
         textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
         decorationBox = { innerTextField ->
             SearchContainer {
-                Crossfade(
+                AnimatedContent(
                     targetState = isSearching,
                     modifier = Modifier.padding(8.dp),
+                    transitionSpec = {
+                        fadeIn(tween(durationMillis = 220, delayMillis = 200)) togetherWith
+                                fadeOut(tween(durationMillis = 220))
+                    },
                     label = "Searching"
                 ) { searching ->
                     when {
                         searching -> SearchProgressIndicator()
                         else -> SearchIcon(focusState?.isFocused ?: false)
                     }
-
                 }
 
                 ContentWithPlaceholder(
@@ -87,7 +96,10 @@ fun SearchBox(
                     modifier = Modifier.weight(1f)
                 )
 
-                OptionsButton(onClick = openOptions)
+                OptionsButton(
+                    onClick = openOptions,
+                    optionsOpened = optionsOpened
+                )
             }
         }
     )
@@ -123,13 +135,13 @@ private fun SearchIcon(
     val transition = updateTransition(targetState = isActive, label = "Search Icon Transition")
 
     val rotationZ by transition.animateFloat(
-        transitionSpec = { tween(600, easing = LinearEasing) },
+        transitionSpec = { tween(400, easing = LinearEasing) },
         label = "Icon Z rotation",
         targetValueByState = { activeState -> if (activeState) 90f else 0f }
     )
 
     val rotationY by transition.animateFloat(
-        transitionSpec = { tween(400, 150, LinearEasing) },
+        transitionSpec = { tween(250, 100, LinearEasing) },
         label = "Icon Y rotation",
         targetValueByState = { activeState -> if (activeState) 360f else 0f }
     )
@@ -165,17 +177,20 @@ private fun ContentWithPlaceholder(
     }
 }
 
+@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 private fun OptionsButton(
     modifier: Modifier = Modifier,
+    optionsOpened: Boolean,
     onClick: () -> Unit
 ) {
+    val avdIcon = AnimatedImageVector.animatedVectorResource(R.drawable.avd_tune)
     IconButton(
         modifier = modifier,
         onClick = onClick
     ) {
         Icon(
-            imageVector = Icons.Rounded.Tune,
+            painter = rememberAnimatedVectorPainter(animatedImageVector = avdIcon, atEnd = optionsOpened),
             tint = MaterialTheme.colorScheme.onSurface,
             contentDescription = "Options"
         )

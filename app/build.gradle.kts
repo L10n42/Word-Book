@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -20,10 +20,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/db_schemas")
-            }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/db_schemas")
+            arg("room.generateKotlin", "true")
         }
     }
 
@@ -80,7 +79,7 @@ dependencies {
     /* Dagger - Hilt */
     val daggerVersion = "2.48"
     implementation ("com.google.dagger:hilt-android:$daggerVersion")
-    kapt("com.google.dagger:hilt-android-compiler:$daggerVersion")
+    ksp("com.google.dagger:hilt-android-compiler:$daggerVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     /* Coroutines */
@@ -100,7 +99,7 @@ dependencies {
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     /* Coil image */
     implementation("io.coil-kt:coil-compose:2.4.0")

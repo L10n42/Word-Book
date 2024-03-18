@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.common
+package com.kappdev.wordbook.main_feature.presentation.common.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -23,9 +22,7 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.presentation.common.CustomModalBottomSheet
 import com.kappdev.wordbook.core.presentation.common.FieldShape
 import com.kappdev.wordbook.ui.theme.CardColors
 
@@ -54,10 +52,7 @@ fun ColorPicker(
     if (isSheetVisible) {
         ColorPickerSheet(
             onDismiss = { showSheet(false) },
-            onColorChanged = {
-                onColorChanged(it)
-                showSheet(false)
-            }
+            onColorChanged = onColorChanged
         )
     }
 
@@ -109,18 +104,13 @@ private fun ColorPickerSheet(
     onDismiss: () -> Unit,
     onColorChanged: (new: Color?) -> Unit
 ) {
-    val state = rememberModalBottomSheetState(true)
-
-    ModalBottomSheet(
+    CustomModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = state,
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp
-    ) {
+        skipPartiallyExpanded = true
+    ) { triggerDismiss ->
         LazyVerticalGrid(
             columns = GridCells.Adaptive(50.dp),
             contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -131,7 +121,10 @@ private fun ColorPickerSheet(
                     contentDescription = "Clear color",
                     modifier = Modifier.colorItem(
                         color = MaterialTheme.colorScheme.surface,
-                        onClick = { onColorChanged(null) }
+                        onClick = {
+                            onColorChanged(null)
+                            triggerDismiss()
+                        }
                     )
                 )
             }
@@ -139,8 +132,14 @@ private fun ColorPickerSheet(
                 Box(
                     Modifier.colorItem(
                         color = color,
-                        borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(0.5f)),
-                        onClick = { onColorChanged(color) }
+                        borderStroke = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface.copy(0.5f)
+                        ),
+                        onClick = {
+                            onColorChanged(color)
+                            triggerDismiss()
+                        }
                     )
                 )
             }

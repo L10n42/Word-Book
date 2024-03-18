@@ -12,8 +12,8 @@ import java.util.Locale
 @Entity(tableName = "collections")
 data class Collection(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Int,
+    @ColumnInfo(name = "collection_id")
+    val id: Int = 0,
 
     @ColumnInfo(name = "name")
     val name: String,
@@ -34,5 +34,5 @@ data class Collection(
 
     @ColumnInfo(name = "card_color")
     @TypeConverters(ColorConverter::class)
-    val color:  Color?
+    val color: Color?
 )

@@ -15,11 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.main_feature.presentation.cards.CardsViewModel
-import com.kappdev.wordbook.main_feature.presentation.common.AnimatedFAB
+import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 
 @Composable
 fun CardsScreen(
+    navController: NavHostController,
     viewModel: CardsViewModel = viewModel()
 ) {
 
@@ -27,7 +30,7 @@ fun CardsScreen(
         topBar = {
             CardsTopBar(
                 collectionName = "Animals",
-                navigateBack = {  },
+                navigateBack = navController::popBackStack,
                 openOptions = {  },
                 openSearch = {  }
             )
@@ -50,7 +53,9 @@ fun CardsScreen(
                 TermCard(
                     card = card,
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = {  }
+                    onClick = {
+                        navController.navigate(Screen.AddEditCard.route)
+                    }
                 )
             }
         }
