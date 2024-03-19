@@ -36,4 +36,16 @@
     <string name="ok">OK</string>
     <string name="delete_collection">Delete collection</string>
     <string name="delete_msg">Are you sure you want to delete this collection and all its cards permanently?</string>
+    <string name="term">Term</string>
+    <string name="hint_enter_term">Enter term</string>
+    <string name="transcription">Transcription</string>
+    <string name="hint_enter_transcription">Enter transcription - optional</string>
+    <string name="definition">Definition</string>
+    <string name="hint_enter_definition">Enter definition</string>
+    <string name="example">Example</string>
+    <string name="hint_enter_example">Enter example - optional</string>
+    <string name="image">Image</string>
+    <string name="another">Another</string>
+    <string name="error_blank_term">Enter term!</string>
+    <string name="error_blank_definition">Enter definition!</string>
 </resources>

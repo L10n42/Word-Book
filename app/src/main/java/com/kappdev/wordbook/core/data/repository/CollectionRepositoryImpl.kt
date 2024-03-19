@@ -27,6 +27,10 @@ class CollectionRepositoryImpl @Inject constructor(
         return collectionDao.getCollectionById(id)
     }
 
+    override suspend fun getCollectionName(id: Int): String? {
+        return collectionDao.getCollectionName(id)
+    }
+
     override fun getCollectionsInfo(): Flow<List<CollectionInfo>> {
         return collectionDao.getCollectionsInfo()
     }

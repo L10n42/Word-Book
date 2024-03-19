@@ -11,6 +11,8 @@ import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionsInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,11 +29,11 @@ class CollectionsViewModel @Inject constructor(
 
     fun getCollections() {
         collectionsJob?.cancel()
-        collectionsJob = viewModelScope.launch(Dispatchers.IO) {
-            getCollectionsInfo().collect { data ->
-                collections = data
-            }
-        }
+        collectionsJob = getCollectionsInfo().onEach(::updateCollections).launchIn(viewModelScope)
+    }
+
+    private fun updateCollections(data: List<CollectionInfo>) {
+        this.collections = data
     }
 
     fun deleteCollection(id: Int) {

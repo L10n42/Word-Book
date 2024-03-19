@@ -12,6 +12,14 @@ class CardRepositoryImpl @Inject constructor(
     private val cardDao: CardDao
 ) : CardRepository {
 
+    override suspend fun insertCard(card: Card) {
+        cardDao.insertCard(card)
+    }
+
+    override suspend fun getCardById(id: Int): Card? {
+        return cardDao.getCardById(id)
+    }
+
     override fun getCollectionCards(collectionId: Int): Flow<List<Card>> {
         return cardDao.getCollectionCards(collectionId)
     }

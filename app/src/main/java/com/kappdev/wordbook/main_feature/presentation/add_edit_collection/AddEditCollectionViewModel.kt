@@ -52,8 +52,7 @@ class AddEditCollectionViewModel @Inject constructor(
 
     fun getCollection(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            val collection = getCollectionById(id)
-            collection?.unpack()
+            getCollectionById(id)?.unpack()
         }
     }
 
@@ -82,8 +81,6 @@ class AddEditCollectionViewModel @Inject constructor(
         updateDefinitionLanguage(this.definitionLanguage)
         cover = this.backgroundImage?.let(Image::Stored)
     }
-
-
 
     fun updateColor(color: Color?) {
         this.color = color

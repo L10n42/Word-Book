@@ -53,7 +53,7 @@ fun OptionsLayout(
 
             if (index != options.lastIndex) {
                 OptionDivider(
-                    Modifier.padding(start = 42.dp, end = 24.dp)
+                    Modifier.padding(start = 48.dp, end = 24.dp)
                 )
             }
         }
@@ -88,7 +88,7 @@ private fun OptionItem(
     ) {
         Icon(
             imageVector = icon,
-            tint = contentColor,
+            tint = MaterialTheme.colorScheme.onBackground,
             contentDescription = "Option Icon"
         )
         Text(

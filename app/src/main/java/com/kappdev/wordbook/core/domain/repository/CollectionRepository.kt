@@ -10,6 +10,8 @@ interface CollectionRepository {
 
     suspend fun getCollectionById(id: Int): Collection?
 
+    suspend fun getCollectionName(id: Int): String?
+
     fun getCollectionsInfo(): Flow<List<CollectionInfo>>
 
     suspend fun deleteCollectionById(id: Int)

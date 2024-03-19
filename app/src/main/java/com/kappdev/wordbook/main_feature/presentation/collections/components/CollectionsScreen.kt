@@ -12,7 +12,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeNodeLifecycleCallback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,9 +69,15 @@ fun CollectionsScreen(
                     info = collectionInfo,
                     cardMoreOpened = (collectionSheet is CollectionSheet.Options && collectionSheet.collection == collectionInfo),
                     modifier = Modifier.fillMaxWidth(),
-                    onNewCard = {},
+                    onNewCard = {
+                        navController.navigate(
+                            Screen.AddEditCard.route.putArg(NavConst.COLLECTION_ID, collectionInfo.id, true)
+                        )
+                    },
                     onClick = {
-                        navController.navigate(Screen.Cards.route)
+                        navController.navigate(
+                            Screen.Cards.route.putArg(NavConst.COLLECTION_ID, collectionInfo.id)
+                        )
                     },
                     onMore = {
                         openSheet(CollectionSheet.Options(collectionInfo))

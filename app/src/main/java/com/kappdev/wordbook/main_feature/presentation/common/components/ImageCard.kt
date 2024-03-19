@@ -41,6 +41,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.FieldShape
 import com.kappdev.wordbook.main_feature.domain.util.Image
+import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import kotlinx.coroutines.delay
 
 @Composable
@@ -48,9 +49,18 @@ fun ImageCard(
     image: Image?,
     title: String,
     modifier: Modifier = Modifier,
-    onPick: () -> Unit,
+    onPick: (source: ImageSource) -> Unit,
     onDelete: () -> Unit,
 ) {
+    var showChooser by remember { mutableStateOf(false) }
+
+    if (showChooser) {
+        ImageSourceChooser(
+            onDismiss = { showChooser = false },
+            onClick = onPick
+        )
+    }
+
     Column(
         modifier
             .background(
@@ -58,7 +68,7 @@ fun ImageCard(
                 shape = FieldShape
             )
             .clip(FieldShape)
-            .clickable(enabled = (image == null), onClick = onPick),
+            .clickable(enabled = (image == null)) { showChooser = true },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -74,7 +84,7 @@ fun ImageCard(
             ActionButton(
                 state = if (image != null) ButtonState.RemoveImage else ButtonState.PickImage,
                 onClick = {
-                    if (image != null) onDelete() else onPick()
+                    if (image != null) onDelete() else showChooser = true
                 }
             )
         }

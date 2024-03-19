@@ -15,11 +15,14 @@ interface CollectionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCollection(collection: Collection)
 
-    @Query("SELECT * FROM collections WHERE collection_id = :id")
+    @Query("SELECT * FROM collections WHERE collection_id = :id LIMIT 1")
     suspend fun getCollectionById(id: Int): Collection?
 
     @Query("DELETE FROM collections WHERE collection_id = :id")
     suspend fun deleteCollectionById(id: Int)
+
+    @Query("SELECT name FROM collections WHERE collection_id = :id LIMIT 1")
+    suspend fun getCollectionName(id: Int): String?
 
     @Query("""
         SELECT 

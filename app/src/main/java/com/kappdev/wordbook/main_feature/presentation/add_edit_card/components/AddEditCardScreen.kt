@@ -14,19 +14,23 @@ import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.domain.util.rememberPickImageLauncher
+import com.kappdev.wordbook.core.domain.util.rememberTakePictureLauncher
 import com.kappdev.wordbook.core.presentation.common.InputField
+import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
-import com.kappdev.wordbook.main_feature.domain.util.Image
+import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.main_feature.presentation.add_edit_card.AddEditCardViewModel
+import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageCard
 import com.kappdev.wordbook.main_feature.presentation.common.components.SimpleTopAppBar
@@ -34,9 +38,28 @@ import com.kappdev.wordbook.main_feature.presentation.common.components.SimpleTo
 @Composable
 fun AddEditCardScreen(
     navController: NavHostController,
-    viewModel: AddEditCardViewModel = viewModel()
+    collectionId: Int? = null,
+    cardId: Int? = null,
+    viewModel: AddEditCardViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val loadingDialog = viewModel.loadingDialog
+
+    if (loadingDialog.isVisible.value) {
+        LoadingDialog(loadingDialog.dialogData.value?.let(context::getString))
+    }
+
+    LaunchedEffect(Unit) {
+        when {
+            (cardId != null && cardId > 0) -> viewModel.getCard(cardId)
+            (collectionId != null && collectionId > 0) -> viewModel.updateCollectionId(collectionId)
+            else -> navController.popBackStack()
+        }
+    }
+
+    val pickImageLauncher = rememberPickImageLauncher { it?.let(viewModel::updateImage) }
+    val takePictureLauncher = rememberTakePictureLauncher { it?.let(viewModel::updateImage) }
 
     Scaffold(
         topBar = {
@@ -48,15 +71,21 @@ fun AddEditCardScreen(
         },
         floatingActionButton = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 32.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AnimatedFAB(text = "Another", icon = Icons.Rounded.Redo) {
-
+                AnimatedFAB(text = stringResource(R.string.another), icon = Icons.Rounded.Redo) {
+                    viewModel.saveAndAnother()
                 }
-                AnimatedFAB(text = "Done", icon = Icons.Rounded.TaskAlt) {
-
+                AnimatedFAB(text = stringResource(R.string.done), icon = Icons.Rounded.TaskAlt) {
+                    viewModel.saveCard {
+                        navController.previousBackStackEntry?.destination?.route.let { previousRoute ->
+                            previousRoute?.let(navController::navigate) ?: navController.navigate(Screen.Collections.route)
+                        }
+                    }
                 }
             }
         },
@@ -72,8 +101,8 @@ fun AddEditCardScreen(
             InputField(
                 value = viewModel.term,
                 onValueChange = viewModel::updateTerm,
-                label = "Term",
-                hint = "Enter term",
+                label = stringResource(R.string.term),
+                hint = stringResource(R.string.hint_enter_term),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -82,8 +111,8 @@ fun AddEditCardScreen(
             InputField(
                 value = viewModel.transcription,
                 onValueChange = viewModel::updateTranscription,
-                label = "Transcription",
-                hint = "Enter transcription - optional",
+                label = stringResource(R.string.transcription),
+                hint = stringResource(R.string.hint_enter_transcription),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -92,8 +121,8 @@ fun AddEditCardScreen(
             InputField(
                 value = viewModel.definition,
                 onValueChange = viewModel::updateDefinition,
-                label = "Definition",
-                hint = "Enter definition",
+                label = stringResource(R.string.definition),
+                hint = stringResource(R.string.hint_enter_definition),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -102,20 +131,25 @@ fun AddEditCardScreen(
             InputField(
                 value = viewModel.example,
                 onValueChange = viewModel::updateExample,
-                label = "Example",
-                hint = "Enter example - optional",
+                label = stringResource(R.string.example),
+                hint = stringResource(R.string.hint_enter_example),
                 modifier = Modifier.fillMaxWidth()
             )
 
             VerticalSpace(16.dp)
 
-            var image by remember { mutableStateOf<Image?>(null) }
             ImageCard(
-                image = image,
-                title = "Background image",
-                onPick = { /* TODO */ },
-                onDelete = { image = null },
-                modifier = Modifier.fillMaxWidth()
+                image = viewModel.cardImage,
+                title = stringResource(R.string.image),
+                onDelete = viewModel::deleteImage,
+                modifier = Modifier.fillMaxWidth(),
+                onPick = { imageSource ->
+                    when (imageSource) {
+                        ImageSource.Camera -> takePictureLauncher.launch(Unit)
+                        ImageSource.Gallery -> pickImageLauncher.launch(Unit)
+                        ImageSource.Internet -> { /* TODO */ }
+                    }
+                }
             )
         }
     }

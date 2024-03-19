@@ -128,27 +128,19 @@ fun AddEditCollectionScreen(
 
             VerticalSpace(16.dp)
 
-            var showChooser by remember { mutableStateOf(false) }
             ImageCard(
                 image = viewModel.cover,
                 title = stringResource(R.string.background_image),
-                onPick = { showChooser = true },
                 onDelete = viewModel::removeCover,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (showChooser) {
-                ImageSourceChooser(
-                    onDismiss = { showChooser = false },
-                    onClick = { imageSource ->
-                        when (imageSource) {
-                            ImageSource.Camera -> takePictureLauncher.launch(Unit)
-                            ImageSource.Gallery -> pickImageLauncher.launch(Unit)
-                            ImageSource.Internet -> { /* TODO */ }
-                        }
+                modifier = Modifier.fillMaxWidth(),
+                onPick = { imageSource ->
+                    when (imageSource) {
+                        ImageSource.Camera -> takePictureLauncher.launch(Unit)
+                        ImageSource.Gallery -> pickImageLauncher.launch(Unit)
+                        ImageSource.Internet -> { /* TODO */ }
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
