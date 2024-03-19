@@ -6,14 +6,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface CollectionRepository {
 
-    suspend fun insertCollection(collection: Collection): Long
+    suspend fun insertCollection(collection: Collection)
 
-    fun getCollections(): Flow<List<Collection>>
-
-    fun getCollectionById(id: Int): Collection?
+    suspend fun getCollectionById(id: Int): Collection?
 
     fun getCollectionsInfo(): Flow<List<CollectionInfo>>
 
-    suspend fun deleteCollection(collection: Collection): Int
+    suspend fun deleteCollectionById(id: Int)
 
 }

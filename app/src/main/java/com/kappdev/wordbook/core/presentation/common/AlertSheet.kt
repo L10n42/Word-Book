@@ -31,13 +31,13 @@ fun AlertSheet(
     positive: String = stringResource(R.string.ok),
     negative: String = stringResource(R.string.cancel),
     onDismiss: () -> Unit,
-    onNegative: () -> Unit = onDismiss,
+    onNegative: () -> Unit = {},
     onPositive: () -> Unit
 ) {
     CustomModalBottomSheet(
         onDismissRequest = onDismiss,
         dragHandle = null
-    ) {
+    ) { triggerDismiss ->
         Column(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
@@ -54,9 +54,15 @@ fun AlertSheet(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                NegativeButton(negative, onClick = onNegative)
+                NegativeButton(negative) {
+                    onNegative()
+                    triggerDismiss()
+                }
                 HorizontalSpace(16.dp)
-                PositiveButton(positive, onClick = onPositive)
+                PositiveButton(positive) {
+                    onPositive()
+                    triggerDismiss()
+                }
             }
         }
     }

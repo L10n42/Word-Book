@@ -240,7 +240,7 @@ private fun BackgroundImage(
 
     val transition by animateFloatAsState(
         targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f,
-        animationSpec = tween(720),
+        animationSpec = tween(400),
         label = "Image Display Transition"
     )
 

@@ -8,7 +8,7 @@ class GetCollectionById @Inject constructor(
     private val collectionRepository: CollectionRepository
 ) {
 
-    operator fun invoke(id: Int): Collection? {
+    suspend operator fun invoke(id: Int): Collection? {
         return collectionRepository.getCollectionById(id)
     }
 }

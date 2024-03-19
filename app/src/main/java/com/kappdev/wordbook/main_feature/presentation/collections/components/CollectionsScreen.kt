@@ -12,6 +12,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeNodeLifecycleCallback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +26,7 @@ import com.kappdev.wordbook.core.presentation.common.AlertSheet
 import com.kappdev.wordbook.core.presentation.navigation.NavConst
 import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.core.presentation.navigation.putArg
-import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
+import com.kappdev.wordbook.main_feature.presentation.collections.CollectionSheet
 import com.kappdev.wordbook.main_feature.presentation.collections.CollectionsViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.Option
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
@@ -35,34 +36,10 @@ fun CollectionsScreen(
     navController: NavHostController,
     viewModel: CollectionsViewModel = hiltViewModel()
 ) {
-    val (optionsCollection, openOptions) = remember { mutableStateOf<CollectionInfo?>(null) }
-    var (deleteCollection, confirmDeletion) = remember { mutableStateOf<CollectionInfo?>(null) }
+    val (collectionSheet, openSheet) = remember { mutableStateOf<CollectionSheet?>(null) }
 
-    if (optionsCollection != null) {
-        CollectionOptions(
-            collectionName = optionsCollection.name,
-            onDismiss = { openOptions(null) },
-            onClick = { option ->
-                when (option) {
-                    is Option.Edit -> navController.navigate(
-                        Screen.AddEditCollection.route.putArg(NavConst.COLLECTION_ID, optionsCollection.id, true)
-                    )
-                    is Option.Delete -> confirmDeletion(optionsCollection)
-                    else -> { /* TODO */ }
-                }
-            }
-        )
-    }
-
-    if (deleteCollection != null) {
-        AlertSheet(
-            title = "Delete collection",
-            message = "Are you sure you want to delete this collection and all its cards permanently?",
-            onDismiss = { confirmDeletion(null) },
-            onPositive = {
-                confirmDeletion(null)
-            }
-        )
+    if (collectionSheet != null) {
+        CollectionSheetHandler(collectionSheet, viewModel, navController::navigate, openSheet)
     }
 
     LaunchedEffect(Unit) {
@@ -91,17 +68,56 @@ fun CollectionsScreen(
 
                 CollectionCard(
                     info = collectionInfo,
-                    cardMoreOpened = (optionsCollection == collectionInfo),
+                    cardMoreOpened = (collectionSheet is CollectionSheet.Options && collectionSheet.collection == collectionInfo),
                     modifier = Modifier.fillMaxWidth(),
                     onNewCard = {},
                     onClick = {
                         navController.navigate(Screen.Cards.route)
                     },
                     onMore = {
-                        openOptions(collectionInfo)
+                        openSheet(CollectionSheet.Options(collectionInfo))
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CollectionSheetHandler(
+    sheet: CollectionSheet,
+    viewModel: CollectionsViewModel,
+    navigate: (route: String) -> Unit,
+    openSheet: (newSheet: CollectionSheet?) -> Unit
+) {
+    val hideSheet = { openSheet(null) }
+
+    when (sheet) {
+        is CollectionSheet.Delete -> {
+            AlertSheet(
+                title = stringResource(R.string.delete_collection),
+                message = stringResource(R.string.delete_msg),
+                positive = stringResource(R.string.delete),
+                onDismiss = hideSheet,
+                onPositive = {
+                    viewModel.deleteCollection(sheet.collection.id)
+                }
+            )
+        }
+        is CollectionSheet.Options -> {
+            CollectionOptions(
+                collectionName = sheet.collection.name,
+                onDismiss = hideSheet,
+                onClick = { option ->
+                    when (option) {
+                        is Option.Edit -> navigate(
+                            Screen.AddEditCollection.route.putArg(NavConst.COLLECTION_ID, sheet.collection.id, true)
+                        )
+                        is Option.Delete -> openSheet(CollectionSheet.Delete(sheet.collection))
+                        else -> { /* TODO */ }
+                    }
+                }
+            )
         }
     }
 }

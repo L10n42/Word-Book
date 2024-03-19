@@ -1,7 +1,6 @@
 package com.kappdev.wordbook.main_feature.presentation.add_edit_collection
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.kappdev.wordbook.core.domain.model.Collection
 import com.kappdev.wordbook.core.domain.util.DialogState
 import com.kappdev.wordbook.core.domain.util.Result
-import com.kappdev.wordbook.core.domain.util.ResultState
 import com.kappdev.wordbook.core.domain.util.mutableDialogStateOf
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionById
 import com.kappdev.wordbook.main_feature.domain.use_case.InsertCollection
@@ -32,7 +30,7 @@ class AddEditCollectionViewModel @Inject constructor(
     private var collectionId: Int? = null
 
     private var _loadingDialog = mutableDialogStateOf<String?>(null)
-    val loadingDialogState: DialogState<String?> = _loadingDialog
+    val loadingDialog: DialogState<String?> = _loadingDialog
 
     var name by mutableStateOf("")
         private set

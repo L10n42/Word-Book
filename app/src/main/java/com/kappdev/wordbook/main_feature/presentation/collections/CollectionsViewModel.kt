@@ -6,16 +6,18 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
+import com.kappdev.wordbook.main_feature.domain.use_case.DeleteCollectionById
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionsInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CollectionsViewModel @Inject constructor(
-    private val getCollectionsInfo: GetCollectionsInfo
+    private val getCollectionsInfo: GetCollectionsInfo,
+    private val deleteCollectionById: DeleteCollectionById
 ) : ViewModel() {
 
     var collections by mutableStateOf<List<CollectionInfo>>(emptyList())
@@ -25,8 +27,16 @@ class CollectionsViewModel @Inject constructor(
 
     fun getCollections() {
         collectionsJob?.cancel()
-        collectionsJob = getCollectionsInfo().onEach { data ->
-            collections = data
-        }.launchIn(viewModelScope)
+        collectionsJob = viewModelScope.launch(Dispatchers.IO) {
+            getCollectionsInfo().collect { data ->
+                collections = data
+            }
+        }
+    }
+
+    fun deleteCollection(id: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteCollectionById(id)
+        }
     }
 }

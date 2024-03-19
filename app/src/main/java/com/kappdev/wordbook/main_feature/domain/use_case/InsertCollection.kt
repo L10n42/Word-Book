@@ -29,11 +29,8 @@ class InsertCollection @Inject constructor(
             return Result.Failure(imageException)
         }
 
-        val result = collectionRepository.insertCollection(collection.copy(backgroundImage = storedImage))
-        return when {
-            result > 0 -> Result.Success(Unit)
-            else -> Result.fail(context.getString(R.string.save_collection_error))
-        }
+        collectionRepository.insertCollection(collection.copy(backgroundImage = storedImage))
+        return Result.Success(Unit)
     }
 
     private fun storeImage(image: Image?): String? {
