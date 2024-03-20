@@ -28,7 +28,6 @@ import com.kappdev.wordbook.core.domain.util.rememberTakePictureLauncher
 import com.kappdev.wordbook.core.presentation.common.InputField
 import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
-import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.main_feature.presentation.add_edit_card.AddEditCardViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
@@ -51,9 +50,10 @@ fun AddEditCardScreen(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.getCollections()
         when {
             (cardId != null && cardId > 0) -> viewModel.getCard(cardId)
-            (collectionId != null && collectionId > 0) -> viewModel.updateCollectionId(collectionId)
+            (collectionId != null && collectionId > 0) -> viewModel.getCollection(collectionId)
             else -> navController.popBackStack()
         }
     }
@@ -64,7 +64,7 @@ fun AddEditCardScreen(
     Scaffold(
         topBar = {
             SimpleTopAppBar(
-                title = "New Card",
+                title = stringResource(R.string.new_card),
                 elevate = scrollState.canScrollBackward,
                 onBack = navController::popBackStack
             )
@@ -82,9 +82,7 @@ fun AddEditCardScreen(
                 }
                 AnimatedFAB(text = stringResource(R.string.done), icon = Icons.Rounded.TaskAlt) {
                     viewModel.saveCard {
-                        navController.previousBackStackEntry?.destination?.route.let { previousRoute ->
-                            previousRoute?.let(navController::navigate) ?: navController.navigate(Screen.Collections.route)
-                        }
+                        navController.popBackStack()
                     }
                 }
             }
@@ -98,6 +96,15 @@ fun AddEditCardScreen(
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
+            CollectionChooser(
+                selected = viewModel.selectedCollection,
+                collections = viewModel.collections,
+                onChange = viewModel::selectCollection,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            VerticalSpace(16.dp)
+
             InputField(
                 value = viewModel.term,
                 onValueChange = viewModel::updateTerm,

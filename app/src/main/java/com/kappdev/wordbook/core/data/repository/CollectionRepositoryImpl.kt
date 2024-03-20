@@ -4,6 +4,7 @@ import com.kappdev.wordbook.core.data.data_rource.CollectionDao
 import com.kappdev.wordbook.core.domain.model.Collection
 import com.kappdev.wordbook.core.domain.repository.CollectionRepository
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
+import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import javax.inject.Inject
@@ -33,5 +34,13 @@ class CollectionRepositoryImpl @Inject constructor(
 
     override fun getCollectionsInfo(): Flow<List<CollectionInfo>> {
         return collectionDao.getCollectionsInfo()
+    }
+
+    override fun getCollectionsPreview(): Flow<List<CollectionPreview>> {
+        return collectionDao.getCollectionsPreview()
+    }
+
+    override fun getCollectionPreview(id: Int): CollectionPreview? {
+        return collectionDao.getCollectionPreview(id)
     }
 }

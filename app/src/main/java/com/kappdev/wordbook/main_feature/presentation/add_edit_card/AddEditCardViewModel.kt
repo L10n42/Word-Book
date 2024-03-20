@@ -11,11 +11,17 @@ import com.kappdev.wordbook.core.domain.model.Card
 import com.kappdev.wordbook.core.domain.util.DialogState
 import com.kappdev.wordbook.core.domain.util.Result
 import com.kappdev.wordbook.core.domain.util.mutableDialogStateOf
+import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCardById
+import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionPreview
+import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionsPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.InsertCard
 import com.kappdev.wordbook.main_feature.domain.util.Image
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -23,14 +29,21 @@ import javax.inject.Inject
 @HiltViewModel
 class AddEditCardViewModel @Inject constructor(
     private val insertCard: InsertCard,
-    private val getCardById: GetCardById
+    private val getCardById: GetCardById,
+    private val getCollectionsPreview: GetCollectionsPreview,
+    private val getCollectionPreview: GetCollectionPreview
 ) : ViewModel() {
 
     private var cardId: Int? = null
-    private var cardCollection: Int? = null
 
     private var _loadingDialog = mutableDialogStateOf<Int?>(null)
     val loadingDialog: DialogState<Int?> = _loadingDialog
+
+    var collections by mutableStateOf<List<CollectionPreview>>(emptyList())
+        private set
+
+    var selectedCollection by mutableStateOf<CollectionPreview?>(null)
+        private set
 
     var term by mutableStateOf("")
         private set
@@ -47,11 +60,23 @@ class AddEditCardViewModel @Inject constructor(
     var cardImage by mutableStateOf<Image?>(null)
         private set
 
+    private var collectionsJob: Job? = null
 
     fun getCard(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             getCardById(id)?.unpack()
         }
+    }
+
+    fun getCollection(collectionId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            selectedCollection = getCollectionPreview(collectionId)
+        }
+    }
+
+    fun getCollections() {
+        collectionsJob?.cancel()
+        collectionsJob = getCollectionsPreview().onEach(::updateCollections).launchIn(viewModelScope)
     }
 
     fun saveAndAnother() = saveCard(onSuccess = ::resetCard)
@@ -71,14 +96,14 @@ class AddEditCardViewModel @Inject constructor(
     }
 
     private fun packCard(): Card? {
-        return cardCollection?.let { collectionId ->
+        return selectedCollection?.id?.let { collectionId ->
             Card(cardId ?: 0, collectionId, term, transcription, definition, example, null)
         } /* TODO(Handle when collection doesn't selected) */
     }
 
     private fun Card.unpack() {
         cardId = this.id
-        cardCollection = this.collectionId
+        getCollection(this.collectionId)
         updateTerm(this.term)
         updateTranscription(this.transcription)
         updateDefinition(this.definition)
@@ -96,8 +121,12 @@ class AddEditCardViewModel @Inject constructor(
     }
 
 
-    fun updateCollectionId(id: Int) {
-        this.cardCollection = id
+    private fun updateCollections(data: List<CollectionPreview>) {
+        this.collections = data
+    }
+
+    fun selectCollection(collection: CollectionPreview) {
+        this.selectedCollection = collection
     }
 
     fun deleteImage() {

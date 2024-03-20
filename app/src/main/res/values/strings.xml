@@ -48,4 +48,6 @@
     <string name="another">Another</string>
     <string name="error_blank_term">Enter term!</string>
     <string name="error_blank_definition">Enter definition!</string>
+    <string name="new_card">New Card</string>
+    <string name="collection">Collection</string>
 </resources>

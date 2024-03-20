@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.kappdev.wordbook.core.domain.model.Collection
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
+import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -37,5 +38,28 @@ interface CollectionDao {
         GROUP BY c.collection_id
     """)
     fun getCollectionsInfo(): Flow<List<CollectionInfo>>
+
+    @Query("""
+        SELECT 
+        c.collection_id AS id,
+        c.name,
+        COUNT(card.card_id) AS cardsCount
+        FROM collections c
+        LEFT JOIN cards card ON c.collection_id = card.collection_id 
+        GROUP BY c.collection_id
+    """)
+    fun getCollectionsPreview(): Flow<List<CollectionPreview>>
+
+    @Query("""
+        SELECT 
+        c.collection_id AS id,
+        c.name,
+        COUNT(card.card_id) AS cardsCount
+        FROM collections c
+        LEFT JOIN cards card ON c.collection_id = card.collection_id
+        WHERE c.collection_id = :id
+        GROUP BY c.collection_id
+    """)
+    fun getCollectionPreview(id: Int): CollectionPreview?
 
 }
