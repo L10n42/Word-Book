@@ -13,18 +13,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.presentation.common.AlertSheet
 import com.kappdev.wordbook.core.presentation.navigation.NavConst
 import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.core.presentation.navigation.putArg
+import com.kappdev.wordbook.main_feature.presentation.cards.CardSheet
 import com.kappdev.wordbook.main_feature.presentation.cards.CardsViewModel
+import com.kappdev.wordbook.main_feature.presentation.common.Option
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
+import com.kappdev.wordbook.main_feature.presentation.common.components.CollectionsSheet
 
 @Composable
 fun CardsScreen(
@@ -32,6 +37,11 @@ fun CardsScreen(
     collectionId: Int?,
     viewModel: CardsViewModel = hiltViewModel()
 ) {
+    val (cardSheet, openSheet) = remember { mutableStateOf<CardSheet?>(null) }
+
+    if (cardSheet != null) {
+        CardSheetHandler(cardSheet, viewModel, navController::navigate, openSheet)
+    }
 
     LaunchedEffect(Unit) {
         when {
@@ -73,12 +83,62 @@ fun CardsScreen(
                     card = card,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        navController.navigate(
-                            Screen.AddEditCard.route.putArg(NavConst.CARD_ID, card.id, true)
-                        )
+                        openSheet(CardSheet.Options(card))
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CardSheetHandler(
+    sheet: CardSheet,
+    viewModel: CardsViewModel,
+    navigate: (route: String) -> Unit,
+    openSheet: (newSheet: CardSheet?) -> Unit
+) {
+    val hideSheet = { openSheet(null) }
+
+    when (sheet) {
+        is CardSheet.Delete -> {
+            AlertSheet(
+                title = stringResource(R.string.delete_card),
+                message = stringResource(R.string.card_delete_msg),
+                positive = stringResource(R.string.delete),
+                onDismiss = hideSheet,
+                onPositive = {
+                    viewModel.deleteCard(sheet.card.id)
+                }
+            )
+        }
+
+        is CardSheet.Options -> {
+            CardOptions(
+                cardTerm = sheet.card.term,
+                onDismiss = hideSheet,
+                onClick = { option ->
+                    when (option) {
+                        is Option.Edit -> navigate(
+                            Screen.AddEditCard.route.putArg(NavConst.CARD_ID, sheet.card.id, true)
+                        )
+                        is Option.MoveTo -> openSheet(CardSheet.PickCollection(sheet.card.id))
+                        is Option.Delete -> openSheet(CardSheet.Delete(sheet.card))
+                        else -> { /* TODO */ }
+                    }
+                }
+            )
+        }
+
+        is CardSheet.PickCollection -> {
+            CollectionsSheet(
+                selected = null,
+                collections = viewModel.collections,
+                onDismiss = hideSheet,
+                onSelect = { selectedCollection ->
+                    viewModel.moveTo(sheet.cardId, selectedCollection.id)
+                }
+            )
         }
     }
 }

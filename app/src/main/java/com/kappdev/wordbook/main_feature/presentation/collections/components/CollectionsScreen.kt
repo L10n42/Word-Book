@@ -101,7 +101,7 @@ private fun CollectionSheetHandler(
         is CollectionSheet.Delete -> {
             AlertSheet(
                 title = stringResource(R.string.delete_collection),
-                message = stringResource(R.string.delete_msg),
+                message = stringResource(R.string.collection_delete_msg),
                 positive = stringResource(R.string.delete),
                 onDismiss = hideSheet,
                 onPositive = {

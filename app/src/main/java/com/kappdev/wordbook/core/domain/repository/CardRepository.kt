@@ -11,5 +11,9 @@ interface CardRepository {
 
     fun getCollectionCards(collectionId: Int): Flow<List<Card>>
 
+    suspend fun deleteCardById(id: Int)
+
+    suspend fun moveCardTo(cardId: Int, newCollectionId: Int)
+
     suspend fun deleteCollectionCards(collectionId: Int)
 }

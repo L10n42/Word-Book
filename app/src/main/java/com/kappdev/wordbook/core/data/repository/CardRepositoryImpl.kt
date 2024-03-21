@@ -24,6 +24,17 @@ class CardRepositoryImpl @Inject constructor(
         return cardDao.getCollectionCards(collectionId)
     }
 
+    override suspend fun deleteCardById(id: Int) {
+        cardDao.getCardById(id)?.let { card ->
+            card.image?.let { path -> File(path).delete() }
+        }
+        cardDao.deleteCardById(id)
+    }
+
+    override suspend fun moveCardTo(cardId: Int, newCollectionId: Int) {
+        cardDao.moveCardTo(cardId, newCollectionId)
+    }
+
     override suspend fun deleteCollectionCards(collectionId: Int) {
         cardDao.getCollectionCards(collectionId).first().forEach { card ->
             card.image?.let { path -> File(path).delete() }

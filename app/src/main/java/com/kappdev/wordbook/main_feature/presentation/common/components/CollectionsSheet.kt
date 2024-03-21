@@ -1,4 +1,4 @@
-package com.kappdev.wordbook.main_feature.presentation.add_edit_card.components
+package com.kappdev.wordbook.main_feature.presentation.common.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

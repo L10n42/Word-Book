@@ -20,6 +20,12 @@ interface CardDao {
     @Query("DELETE FROM cards WHERE collection_id = :collectionId")
     suspend fun deleteCollectionCards(collectionId: Int)
 
+    @Query("DELETE FROM cards WHERE card_id = :id")
+    suspend fun deleteCardById(id: Int)
+
+    @Query("UPDATE cards SET collection_id = :newCollectionId WHERE card_id = :cardId")
+    suspend fun moveCardTo(cardId: Int, newCollectionId: Int)
+
     @Query("SELECT * FROM cards WHERE collection_id = :collectionId")
     fun getCollectionCards(collectionId: Int): Flow<List<Card>>
 

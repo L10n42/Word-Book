@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.ChooserButton
 import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
+import com.kappdev.wordbook.main_feature.presentation.common.components.CollectionsSheet
 
 @Composable
 fun CollectionChooser(
