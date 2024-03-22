@@ -137,6 +137,10 @@ class AddEditCardViewModel @Inject constructor(
         this.cardImage = Image.NotStored(uri)
     }
 
+    fun updateImage(url: String) {
+        this.cardImage = Image.FromInternet(url)
+    }
+
     fun updateTerm(value: String) {
         this.term = value
     }

@@ -34,7 +34,7 @@ import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.ColorPicker
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageCard
-import com.kappdev.wordbook.main_feature.presentation.common.components.ImageSourceChooser
+import com.kappdev.wordbook.main_feature.presentation.common.components.ImageUrlSheet
 import com.kappdev.wordbook.main_feature.presentation.common.components.SimpleTopAppBar
 
 @Composable
@@ -55,6 +55,14 @@ fun AddEditCollectionScreen(
 
     val pickImageLauncher = rememberPickImageLauncher { it?.let(viewModel::updateCover) }
     val takePictureLauncher = rememberTakePictureLauncher { it?.let(viewModel::updateCover) }
+
+    var showUrlSheet by remember { mutableStateOf(false) }
+    if (showUrlSheet) {
+        ImageUrlSheet(
+            onDismiss = { showUrlSheet = false },
+            onDownload = viewModel::updateCover
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -137,7 +145,7 @@ fun AddEditCollectionScreen(
                     when (imageSource) {
                         ImageSource.Camera -> takePictureLauncher.launch(Unit)
                         ImageSource.Gallery -> pickImageLauncher.launch(Unit)
-                        ImageSource.Internet -> { /* TODO */ }
+                        ImageSource.Internet -> showUrlSheet = true
                     }
                 }
             )

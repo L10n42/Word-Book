@@ -52,4 +52,8 @@
     <string name="new_card">New Card</string>
     <string name="collection">Collection</string>
     <string name="delete_card">Delete Card</string>
+    <string name="download_image_error">Couldn\'t download image</string>
+    <string name="image_url">Image URL</string>
+    <string name="hint_enter_url">Enter image url here…</string>
+    <string name="download">Download</string>
 </resources>

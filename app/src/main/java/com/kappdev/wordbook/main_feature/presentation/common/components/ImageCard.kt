@@ -148,7 +148,7 @@ private fun ActionButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val avdIcon = AnimatedImageVector.animatedVectorResource(R.drawable.chevron_r_to_close_rotate)
+    val avdIcon = AnimatedImageVector.animatedVectorResource(R.drawable.avd_chevron_to_close)
     Icon(
         painter = rememberAnimatedVectorPainter(animatedImageVector = avdIcon, atEnd = (state == ButtonState.RemoveImage)),
         tint = MaterialTheme.colorScheme.primary,

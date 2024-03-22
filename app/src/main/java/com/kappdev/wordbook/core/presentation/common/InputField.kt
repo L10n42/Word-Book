@@ -44,6 +44,7 @@ fun InputField(
     modifier: Modifier = Modifier,
     hint: String? = null,
     label: String? = null,
+    singleLine: Boolean = false,
     onValueChange: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -61,6 +62,7 @@ fun InputField(
 
     BasicTextField(
         value = value,
+        singleLine = singleLine,
         modifier = modifier
             .focusRequester(focusRequester)
             .onFocusChanged(changeFocus)

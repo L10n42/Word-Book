@@ -15,6 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +36,7 @@ import com.kappdev.wordbook.main_feature.presentation.add_edit_card.AddEditCardV
 import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageCard
+import com.kappdev.wordbook.main_feature.presentation.common.components.ImageUrlSheet
 import com.kappdev.wordbook.main_feature.presentation.common.components.SimpleTopAppBar
 
 @Composable
@@ -60,6 +65,14 @@ fun AddEditCardScreen(
 
     val pickImageLauncher = rememberPickImageLauncher { it?.let(viewModel::updateImage) }
     val takePictureLauncher = rememberTakePictureLauncher { it?.let(viewModel::updateImage) }
+
+    var showUrlSheet by remember { mutableStateOf(false) }
+    if (showUrlSheet) {
+        ImageUrlSheet(
+            onDismiss = { showUrlSheet = false },
+            onDownload = viewModel::updateImage
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -154,7 +167,7 @@ fun AddEditCardScreen(
                     when (imageSource) {
                         ImageSource.Camera -> takePictureLauncher.launch(Unit)
                         ImageSource.Gallery -> pickImageLauncher.launch(Unit)
-                        ImageSource.Internet -> { /* TODO */ }
+                        ImageSource.Internet -> showUrlSheet = true
                     }
                 }
             )

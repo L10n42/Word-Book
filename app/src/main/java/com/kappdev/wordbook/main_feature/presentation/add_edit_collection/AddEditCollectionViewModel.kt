@@ -94,6 +94,10 @@ class AddEditCollectionViewModel @Inject constructor(
         this.cover = Image.NotStored(uri)
     }
 
+    fun updateCover(url: String) {
+        this.cover = Image.FromInternet(url)
+    }
+
     fun updateName(value: String) {
         this.name = value
     }
