@@ -6,17 +6,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.canhub.cropper.CropImageView
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.domain.model.Card
 import com.kappdev.wordbook.core.domain.util.DialogState
 import com.kappdev.wordbook.core.domain.util.Result
 import com.kappdev.wordbook.core.domain.util.mutableDialogStateOf
 import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
+import com.kappdev.wordbook.main_feature.domain.use_case.DownloadImage
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCardById
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionsPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.InsertCard
 import com.kappdev.wordbook.main_feature.domain.util.Image
+import com.kappdev.wordbook.main_feature.domain.util.delete
+import com.kappdev.wordbook.main_feature.domain.util.update
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +34,7 @@ import javax.inject.Inject
 class AddEditCardViewModel @Inject constructor(
     private val insertCard: InsertCard,
     private val getCardById: GetCardById,
+    private val downloadImage: DownloadImage,
     private val getCollectionsPreview: GetCollectionsPreview,
     private val getCollectionPreview: GetCollectionPreview
 ) : ViewModel() {
@@ -57,7 +62,7 @@ class AddEditCardViewModel @Inject constructor(
     var example by mutableStateOf("")
         private set
 
-    var cardImage by mutableStateOf<Image?>(null)
+    var cardImage by mutableStateOf<Image>(Image.Empty)
         private set
 
     private var collectionsJob: Job? = null
@@ -95,6 +100,26 @@ class AddEditCardViewModel @Inject constructor(
         }
     }
 
+    fun handleCropImageResult(result: CropImageView.CropResult) {
+        if (result.isSuccessful) {
+            result.uriContent?.let(::updateImage)
+        } else {
+            /* TODO(handle image error) */
+        }
+    }
+
+    fun downloadImageFromUrl(url: String, onSuccess: (Uri) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _loadingDialog.showDialog(R.string.downloading)
+            val result = downloadImage(url)
+            _loadingDialog.hideDialog()
+            when (result) {
+                is Result.Success -> withContext(Dispatchers.Main) { onSuccess(result.value) }
+                is Result.Failure -> { /* TODO */ }
+            }
+        }
+    }
+
     private fun packCard(): Card? {
         return selectedCollection?.id?.let { collectionId ->
             Card(cardId ?: 0, collectionId, term, transcription, definition, example, null)
@@ -108,7 +133,7 @@ class AddEditCardViewModel @Inject constructor(
         updateTranscription(this.transcription)
         updateDefinition(this.definition)
         updateExample(this.example)
-        cardImage = this.image?.let(Image::Stored)
+        cardImage = this.image?.let(Image::Stored) ?: Image.Empty
     }
 
     private fun resetCard() {
@@ -117,12 +142,15 @@ class AddEditCardViewModel @Inject constructor(
         this.transcription = ""
         this.definition = ""
         this.example = ""
-        cardImage = null
+        cardImage = Image.Empty
     }
-
 
     private fun updateCollections(data: List<CollectionPreview>) {
         this.collections = data
+    }
+
+    private fun updateImage(newImage: Uri) {
+        this.cardImage = cardImage.update(newImage)
     }
 
     fun selectCollection(collection: CollectionPreview) {
@@ -130,15 +158,7 @@ class AddEditCardViewModel @Inject constructor(
     }
 
     fun deleteImage() {
-        this.cardImage = null
-    }
-
-    fun updateImage(uri: Uri) {
-        this.cardImage = Image.NotStored(uri)
-    }
-
-    fun updateImage(url: String) {
-        this.cardImage = Image.FromInternet(url)
+        this.cardImage = cardImage.delete()
     }
 
     fun updateTerm(value: String) {

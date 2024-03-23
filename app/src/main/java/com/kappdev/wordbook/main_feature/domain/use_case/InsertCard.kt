@@ -2,7 +2,6 @@ package com.kappdev.wordbook.main_feature.domain.use_case
 
 import android.content.Context
 import com.kappdev.wordbook.R
-import com.kappdev.wordbook.core.data.util.StoreImageException
 import com.kappdev.wordbook.core.domain.model.Card
 import com.kappdev.wordbook.core.domain.repository.CardRepository
 import com.kappdev.wordbook.core.domain.util.Result
@@ -18,16 +17,15 @@ class InsertCard @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    suspend operator fun invoke(card: Card, image: Image?): Result<Unit> {
+    suspend operator fun invoke(card: Card, image: Image): Result<Unit> {
         validateValues(card)?.let { return it }
 
-        val storedImage = try {
-            storeImage(image)
-        } catch (imageException: StoreImageException) {
-            return Result.Failure(imageException)
+        val imageResult = manageImage(image)
+        when (imageResult) {
+            is Result.Failure -> return Result.Failure(imageResult.exception)
+            is Result.Success -> cardRepository.insertCard(card.copy(image = imageResult.value))
         }
 
-        cardRepository.insertCard(card.copy(image = storedImage))
         return Result.Success(Unit)
     }
 
@@ -43,14 +41,19 @@ class InsertCard @Inject constructor(
         }
     }
 
-    private fun storeImage(image: Image?): String? {
-        if (image != null && image is Image.NotStored) {
-            val imageResult = storageRepository.storeImage(image.uri)
-            return when (imageResult) {
-                is Result.Failure -> throw imageResult.exception
-                is Result.Success -> imageResult.value
+    private fun manageImage(image: Image): Result<String?> {
+        return when (image) {
+            is Image.Deleted -> {
+                storageRepository.deleteImage(image.path)
+                Result.Success(null)
             }
+            is Image.Replaced -> {
+                storageRepository.deleteImage(image.oldPath)
+                storageRepository.storeImage(image.newUri)
+            }
+            is Image.NotStored -> storageRepository.storeImage(image.uri)
+            is Image.Stored -> Result.Success(image.path)
+            is Image.Empty -> Result.Success(null)
         }
-        return image?.model
     }
 }

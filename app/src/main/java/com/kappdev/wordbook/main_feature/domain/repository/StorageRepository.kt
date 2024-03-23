@@ -7,6 +7,5 @@ interface StorageRepository {
 
     fun storeImage(uri: Uri): Result<String>
 
-    suspend fun storeImage(url: String): Result<String>
-
+    fun deleteImage(path: String)
 }

@@ -104,6 +104,9 @@ dependencies {
     /* Coil image */
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    /* Android Image Cropper */
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
+
     /* Default tests */
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

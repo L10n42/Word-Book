@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.WordBook" parent="android:Theme.Material.Light.NoActionBar" />
+
+<!--    @style/Base.Theme.AppCompat-->
+    <style name="ImageCopperStyle" parent="Base.Theme.AppCompat">
+        <item name="homeAsUpIndicator">@drawable/round_close_24</item>
+
+    </style>
+
 </resources>

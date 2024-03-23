@@ -41,19 +41,19 @@ import coil.compose.SubcomposeAsyncImage
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.FieldShape
 import com.kappdev.wordbook.main_feature.domain.util.Image
+import com.kappdev.wordbook.main_feature.domain.util.isNotEmptyOrDeleted
 import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
 import kotlinx.coroutines.delay
 
 @Composable
 fun ImageCard(
-    image: Image?,
+    image: Image,
     title: String,
     modifier: Modifier = Modifier,
     onPick: (source: ImageSource) -> Unit,
     onDelete: () -> Unit,
 ) {
     var showChooser by remember { mutableStateOf(false) }
-
     if (showChooser) {
         ImageSourceChooser(
             onDismiss = { showChooser = false },
@@ -68,7 +68,7 @@ fun ImageCard(
                 shape = FieldShape
             )
             .clip(FieldShape)
-            .clickable(enabled = (image == null)) { showChooser = true },
+            .clickable(enabled = !image.isNotEmptyOrDeleted()) { showChooser = true },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -82,9 +82,9 @@ fun ImageCard(
                 Modifier.weight(1f)
             )
             ActionButton(
-                state = if (image != null) ButtonState.RemoveImage else ButtonState.PickImage,
+                state = if (image.isNotEmptyOrDeleted()) ButtonState.RemoveImage else ButtonState.PickImage,
                 onClick = {
-                    if (image != null) onDelete() else showChooser = true
+                    if (image.isNotEmptyOrDeleted()) onDelete() else showChooser = true
                 }
             )
         }
@@ -98,13 +98,13 @@ fun ImageCard(
 
 @Composable
 private fun AnimatedImageContent(
-    image: Image?,
+    image: Image,
     modifier: Modifier = Modifier
 ) {
-    var imageToDisplay by remember { mutableStateOf<Image?>(null) }
+    var imageToDisplay by remember { mutableStateOf<Image>(Image.Empty) }
 
     LaunchedEffect(image) {
-        if (image != null) {
+        if (image.isNotEmptyOrDeleted()) {
             imageToDisplay = image
         } else {
             delay(700)
@@ -113,7 +113,7 @@ private fun AnimatedImageContent(
     }
 
     AnimatedVisibility(
-        visible = image != null,
+        visible = image.isNotEmptyOrDeleted(),
         modifier = modifier,
         enter = expandVertically(
             tween(durationMillis = 400), expandFrom = Alignment.Top
@@ -127,7 +127,7 @@ private fun AnimatedImageContent(
         )
     ) {
         SubcomposeAsyncImage(
-            model = imageToDisplay?.model,
+            model = imageToDisplay.takeIf(Image::isNotEmptyOrDeleted)?.model,
             modifier = Modifier
                 .background(
                     color = MaterialTheme.colorScheme.background.copy(0.5f),
@@ -135,8 +135,14 @@ private fun AnimatedImageContent(
                 )
                 .clip(RoundedCornerShape(12.dp)),
             contentDescription = "Image",
-            error = { ErrorImage(Modifier.fillMaxWidth().aspectRatio(2f)) },
-            loading = { LoadingImage(Modifier.fillMaxWidth().aspectRatio(2f)) }
+            error = { ErrorImage(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f)) },
+            loading = { LoadingImage(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f)) }
         )
     }
 }

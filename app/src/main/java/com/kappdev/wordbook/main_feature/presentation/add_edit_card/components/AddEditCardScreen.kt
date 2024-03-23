@@ -21,19 +21,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
-import com.kappdev.wordbook.core.domain.util.rememberPickImageLauncher
-import com.kappdev.wordbook.core.domain.util.rememberTakePictureLauncher
 import com.kappdev.wordbook.core.presentation.common.InputField
 import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
+import com.kappdev.wordbook.main_feature.domain.util.CropImageInput
+import com.kappdev.wordbook.main_feature.domain.util.rememberCropImageLauncher
+import com.kappdev.wordbook.main_feature.domain.util.rememberPickAndCropImageLauncher
+import com.kappdev.wordbook.main_feature.domain.util.rememberTakeAndCropImageLauncher
 import com.kappdev.wordbook.main_feature.presentation.add_edit_card.AddEditCardViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
+import com.kappdev.wordbook.main_feature.presentation.common.ImageType
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageCard
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageUrlSheet
@@ -46,12 +48,11 @@ fun AddEditCardScreen(
     cardId: Int? = null,
     viewModel: AddEditCardViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
     val loadingDialog = viewModel.loadingDialog
 
     if (loadingDialog.isVisible.value) {
-        LoadingDialog(loadingDialog.dialogData.value?.let(context::getString))
+        LoadingDialog(loadingDialog.dialogData.value)
     }
 
     LaunchedEffect(Unit) {
@@ -63,14 +64,19 @@ fun AddEditCardScreen(
         }
     }
 
-    val pickImageLauncher = rememberPickImageLauncher { it?.let(viewModel::updateImage) }
-    val takePictureLauncher = rememberTakePictureLauncher { it?.let(viewModel::updateImage) }
+    val takeAndCropImage = rememberTakeAndCropImageLauncher(onResult = viewModel::handleCropImageResult)
+    val pickAndCropImage = rememberPickAndCropImageLauncher(onResult = viewModel::handleCropImageResult)
+    val cropImage = rememberCropImageLauncher(onResult = viewModel::handleCropImageResult)
 
     var showUrlSheet by remember { mutableStateOf(false) }
     if (showUrlSheet) {
         ImageUrlSheet(
             onDismiss = { showUrlSheet = false },
-            onDownload = viewModel::updateImage
+            onDownload = { imageUrl ->
+                viewModel.downloadImageFromUrl(imageUrl) { uri ->
+                    cropImage.launch(CropImageInput(uri, ImageType.Card))
+                }
+            }
         )
     }
 
@@ -165,8 +171,8 @@ fun AddEditCardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 onPick = { imageSource ->
                     when (imageSource) {
-                        ImageSource.Camera -> takePictureLauncher.launch(Unit)
-                        ImageSource.Gallery -> pickImageLauncher.launch(Unit)
+                        ImageSource.Camera -> takeAndCropImage.launch(ImageType.Card)
+                        ImageSource.Gallery -> pickAndCropImage.launch(ImageType.Card)
                         ImageSource.Internet -> showUrlSheet = true
                     }
                 }

@@ -56,4 +56,6 @@
     <string name="image_url">Image URL</string>
     <string name="hint_enter_url">Enter image url here…</string>
     <string name="download">Download</string>
+    <string name="crop_image">Crop image</string>
+    <string name="downloading">Downloading</string>
 </resources>

@@ -1,20 +1,18 @@
 package com.kappdev.wordbook.core.presentation.common
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.toRect
@@ -37,29 +35,27 @@ data class StrokeStyle(
 
 @Composable
 fun CustomCircleLoader(
-    isVisible: Boolean,
+    modifier: Modifier,
     color: Color,
-    modifier: Modifier = Modifier,
+    isVisible: Boolean,
     secondColor: Color? = color,
-    diameter: Dp = 32.dp,
-    tailLength: Float = 140f, // in degrees | 0f - 360f
-    stokeStyle: StrokeStyle = StrokeStyle(),
+    tailLength: Float = 150f, // in degrees | 0f - 360f
+    smoothTransition: Boolean = true,
+    strokeStyle: StrokeStyle = StrokeStyle(),
     cycleDuration: Int = 1600,
 ) {
-    var tailToDisplay by remember { mutableStateOf(0f) }
+    val tailToDisplay = remember { Animatable(0f) }
 
     LaunchedEffect(isVisible) {
-        tailToDisplay = if (isVisible) tailLength else 0f
+        val targetTail = if (isVisible) tailLength else 0f
+        when {
+            smoothTransition -> tailToDisplay.animateTo(targetTail, tween(cycleDuration, easing = LinearEasing))
+            else -> tailToDisplay.snapTo(targetTail)
+        }
     }
 
-    val animatedTail by animateFloatAsState(
-        targetValue = tailToDisplay,
-        animationSpec = tween(cycleDuration , easing = LinearEasing),
-        label = "Tail Animation Transition"
-    )
-
-    val transition = rememberInfiniteTransition(label = "Circle Loader Transition")
-    val spinAngel = transition.animateFloat(
+    val transition = rememberInfiniteTransition()
+    val spinAngel by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
@@ -68,29 +64,26 @@ fun CustomCircleLoader(
                 easing = LinearEasing
             ),
             repeatMode = RepeatMode.Restart
-        ),
-        label = "Spin Angle Transition"
+        )
     )
 
     Canvas(
-        modifier = modifier
-            .size(diameter)
-            .rotate(spinAngel.value)
+        modifier = modifier.rotate(spinAngel).aspectRatio(1f)
     ) {
         listOfNotNull(color, secondColor).forEachIndexed { index, color ->
             rotate(if (index == 0) 0f else 180f) {
                 val brush = Brush.sweepGradient(
                     0f to Color.Transparent,
-                    animatedTail / 360f to color,
+                    tailToDisplay.value / 360f to color,
                     1f to Color.Transparent
                 )
-                val paint = setupPaint(stokeStyle, brush)
+                val paint = setupPaint(strokeStyle, brush)
 
                 drawIntoCanvas { canvas ->
                     canvas.drawArc(
                         rect = size.toRect(),
                         startAngle = 0f,
-                        sweepAngle = animatedTail,
+                        sweepAngle = tailToDisplay.value,
                         useCenter = false,
                         paint = paint
                     )

@@ -24,13 +24,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.domain.util.TextToSpeechHelper
-import com.kappdev.wordbook.core.domain.util.rememberPickImageLauncher
-import com.kappdev.wordbook.core.domain.util.rememberTakePictureLauncher
 import com.kappdev.wordbook.core.presentation.common.InputField
+import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
 import com.kappdev.wordbook.core.presentation.navigation.Screen
+import com.kappdev.wordbook.main_feature.domain.util.CropImageInput
+import com.kappdev.wordbook.main_feature.domain.util.rememberCropImageLauncher
+import com.kappdev.wordbook.main_feature.domain.util.rememberPickAndCropImageLauncher
+import com.kappdev.wordbook.main_feature.domain.util.rememberTakeAndCropImageLauncher
 import com.kappdev.wordbook.main_feature.presentation.add_edit_collection.AddEditCollectionViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.ImageSource
+import com.kappdev.wordbook.main_feature.presentation.common.ImageType
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.ColorPicker
 import com.kappdev.wordbook.main_feature.presentation.common.components.ImageCard
@@ -45,6 +49,7 @@ fun AddEditCollectionScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val loadingDialog = viewModel.loadingDialog
     val ttsHelper = remember { TextToSpeechHelper(context) }
 
     LaunchedEffect(Unit) {
@@ -53,14 +58,23 @@ fun AddEditCollectionScreen(
         }
     }
 
-    val pickImageLauncher = rememberPickImageLauncher { it?.let(viewModel::updateCover) }
-    val takePictureLauncher = rememberTakePictureLauncher { it?.let(viewModel::updateCover) }
+    if (loadingDialog.isVisible.value) {
+        LoadingDialog(loadingDialog.dialogData.value)
+    }
+
+    val takeAndCropImage = rememberTakeAndCropImageLauncher(onResult = viewModel::handleCropImageResult)
+    val pickAndCropImage = rememberPickAndCropImageLauncher(onResult = viewModel::handleCropImageResult)
+    val cropImage = rememberCropImageLauncher(onResult = viewModel::handleCropImageResult)
 
     var showUrlSheet by remember { mutableStateOf(false) }
     if (showUrlSheet) {
         ImageUrlSheet(
             onDismiss = { showUrlSheet = false },
-            onDownload = viewModel::updateCover
+            onDownload = { imageUrl ->
+                viewModel.downloadImageFromUrl(imageUrl) { uri ->
+                    cropImage.launch(CropImageInput(uri, ImageType.Cover))
+                }
+            }
         )
     }
 
@@ -139,12 +153,12 @@ fun AddEditCollectionScreen(
             ImageCard(
                 image = viewModel.cover,
                 title = stringResource(R.string.background_image),
-                onDelete = viewModel::removeCover,
+                onDelete = viewModel::deleteCover,
                 modifier = Modifier.fillMaxWidth(),
                 onPick = { imageSource ->
                     when (imageSource) {
-                        ImageSource.Camera -> takePictureLauncher.launch(Unit)
-                        ImageSource.Gallery -> pickImageLauncher.launch(Unit)
+                        ImageSource.Camera -> takeAndCropImage.launch(ImageType.Cover)
+                        ImageSource.Gallery -> pickAndCropImage.launch(ImageType.Cover)
                         ImageSource.Internet -> showUrlSheet = true
                     }
                 }

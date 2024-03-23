@@ -7,13 +7,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.canhub.cropper.CropImageView
+import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.domain.model.Collection
 import com.kappdev.wordbook.core.domain.util.DialogState
 import com.kappdev.wordbook.core.domain.util.Result
 import com.kappdev.wordbook.core.domain.util.mutableDialogStateOf
+import com.kappdev.wordbook.main_feature.domain.use_case.DownloadImage
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionById
 import com.kappdev.wordbook.main_feature.domain.use_case.InsertCollection
 import com.kappdev.wordbook.main_feature.domain.util.Image
+import com.kappdev.wordbook.main_feature.domain.util.delete
+import com.kappdev.wordbook.main_feature.domain.util.update
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,13 +29,14 @@ import javax.inject.Inject
 @HiltViewModel
 class AddEditCollectionViewModel @Inject constructor(
     private val insertCollection: InsertCollection,
-    private val getCollectionById: GetCollectionById
+    private val getCollectionById: GetCollectionById,
+    private val downloadImage: DownloadImage,
 ) : ViewModel() {
 
     private var collectionId: Int? = null
 
-    private var _loadingDialog = mutableDialogStateOf<String?>(null)
-    val loadingDialog: DialogState<String?> = _loadingDialog
+    private var _loadingDialog = mutableDialogStateOf<Int?>(null)
+    val loadingDialog: DialogState<Int?> = _loadingDialog
 
     var name by mutableStateOf("")
         private set
@@ -44,7 +50,7 @@ class AddEditCollectionViewModel @Inject constructor(
     var definitionLanguage by mutableStateOf(Locale.UK)
         private set
 
-    var cover by mutableStateOf<Image?>(null)
+    var cover by mutableStateOf<Image>(Image.Empty)
         private set
 
     var color by mutableStateOf<Color?>(null)
@@ -58,12 +64,32 @@ class AddEditCollectionViewModel @Inject constructor(
 
     fun saveCollection(onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            _loadingDialog.showDialog("Saving")
+            _loadingDialog.showDialog(R.string.saving)
             val result = insertCollection(packCollection(), cover)
             _loadingDialog.hideDialog()
             when (result) {
                 is Result.Failure -> { /* TODO */ }
                 is Result.Success -> withContext(Dispatchers.Main) { onSuccess() }
+            }
+        }
+    }
+
+    fun handleCropImageResult(result: CropImageView.CropResult) {
+        if (result.isSuccessful) {
+            result.uriContent?.let(::updateCover)
+        } else {
+            /* TODO(handle image error) */
+        }
+    }
+
+    fun downloadImageFromUrl(url: String, onSuccess: (Uri) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _loadingDialog.showDialog(R.string.downloading)
+            val result = downloadImage(url)
+            _loadingDialog.hideDialog()
+            when (result) {
+                is Result.Success -> withContext(Dispatchers.Main) { onSuccess(result.value) }
+                is Result.Failure -> { /* TODO */ }
             }
         }
     }
@@ -79,23 +105,19 @@ class AddEditCollectionViewModel @Inject constructor(
         updateColor(this.color)
         updateTermLanguage(this.termLanguage)
         updateDefinitionLanguage(this.definitionLanguage)
-        cover = this.backgroundImage?.let(Image::Stored)
+        cover = this.backgroundImage?.let(Image::Stored) ?: Image.Empty
+    }
+
+    private fun updateCover(newCover: Uri) {
+        this.cover = cover.update(newCover)
     }
 
     fun updateColor(color: Color?) {
         this.color = color
     }
 
-    fun removeCover() {
-        this.cover = null
-    }
-
-    fun updateCover(uri: Uri) {
-        this.cover = Image.NotStored(uri)
-    }
-
-    fun updateCover(url: String) {
-        this.cover = Image.FromInternet(url)
+    fun deleteCover() {
+        this.cover = cover.delete()
     }
 
     fun updateName(value: String) {

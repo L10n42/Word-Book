@@ -4,35 +4,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.coroutines.delay
+
+@Composable
+fun LoadingDialog(
+    messageRes: Int?
+) {
+    val context = LocalContext.current
+    LoadingDialog(messageRes?.let(context::getString))
+}
 
 @Composable
 fun LoadingDialog(
     message: String? = null
 ) {
-    var isLoaderVisible by remember { mutableStateOf(true) }
-
-    LaunchedEffect(Unit) {
-        delay(7000)
-        isLoaderVisible = false
-    }
-
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(
@@ -49,10 +45,9 @@ fun LoadingDialog(
                     .padding(16.dp)
             ) {
                 CustomCircleLoader(
-                    isVisible = isLoaderVisible,
-                    color = MaterialTheme.colorScheme.primary,
-                    tailLength = 365f,
-                    secondColor = null
+                    isVisible = true,
+                    modifier = Modifier.size(32.dp),
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 if (!message.isNullOrBlank()) {
