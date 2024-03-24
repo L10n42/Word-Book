@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.rotate
 @Composable
 fun AnimatedBackButton(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     var rotate by remember { mutableStateOf(false) }
@@ -29,6 +30,7 @@ fun AnimatedBackButton(
 
     androidx.compose.material.IconButton(
         modifier = modifier,
+        enabled = enabled,
         onClick = {
             rotate = true
             onClick()
