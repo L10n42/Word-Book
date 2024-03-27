@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.AlertSheet
+import com.kappdev.wordbook.core.presentation.common.FABPadding
 import com.kappdev.wordbook.core.presentation.navigation.NavConst
 import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.core.presentation.navigation.putArg
@@ -32,6 +33,7 @@ import com.kappdev.wordbook.main_feature.presentation.cards.CardsViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.Option
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
 import com.kappdev.wordbook.main_feature.presentation.common.components.CollectionsSheet
+import com.kappdev.wordbook.main_feature.presentation.common.components.EmptyScreen
 
 @Composable
 fun CardsScreen(
@@ -49,7 +51,7 @@ fun CardsScreen(
         when {
             (collectionId != null && collectionId > 0) -> {
                 viewModel.getCards(collectionId)
-                viewModel.getTitle(collectionId)
+                viewModel.getCollectionInfo(collectionId)
             }
             else -> navController.popBackStack()
         }
@@ -79,7 +81,7 @@ fun CardsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(pv),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(bottom = FABPadding, top = 16.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(viewModel.cards, { it.id }) { card ->
@@ -88,9 +90,16 @@ fun CardsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         openSheet(CardSheet.Options(card))
-                    }
+                    },
+                    onSpeak = viewModel::speak
                 )
             }
+        }
+        if (viewModel.cards.isEmpty()) {
+            EmptyScreen(
+                message = stringResource(R.string.no_cards_msg),
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

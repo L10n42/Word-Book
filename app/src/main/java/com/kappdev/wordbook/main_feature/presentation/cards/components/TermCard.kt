@@ -35,6 +35,7 @@ import com.kappdev.wordbook.main_feature.presentation.common.components.LoadingI
 fun TermCard(
     card: Card,
     modifier: Modifier = Modifier,
+    onSpeak: (text: String) -> Unit,
     onClick: () -> Unit
 ) {
     val hasImage = remember(card) { card.image != null }
@@ -89,6 +90,7 @@ fun TermCard(
         Speaker(
             textToSpeak = card.term,
             textToShow = card.transcription,
+            speak = onSpeak,
             modifier = Modifier.constrainAs(speaker) {
                 top.linkTo(parent.top, 4.dp)
                 end.linkTo(parent.end, 4.dp)

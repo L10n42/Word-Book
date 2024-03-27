@@ -1,6 +1,7 @@
 package com.kappdev.wordbook.di
 
 import android.content.Context
+import com.kappdev.wordbook.core.domain.util.TextToSpeechHelper
 import com.kappdev.wordbook.main_feature.data.repository.StorageRepositoryImpl
 import com.kappdev.wordbook.main_feature.domain.repository.StorageRepository
 import dagger.Module
@@ -20,4 +21,9 @@ object MainModule {
         return StorageRepositoryImpl(context)
     }
 
+    @Provides
+    @Singleton
+    fun provideTextToSpeechHelper(@ApplicationContext context: Context): TextToSpeechHelper {
+        return TextToSpeechHelper(context)
+    }
 }

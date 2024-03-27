@@ -17,7 +17,7 @@ fun DragHandleTitle(
     title: String
 ) {
     Box(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.padding(horizontal = 32.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

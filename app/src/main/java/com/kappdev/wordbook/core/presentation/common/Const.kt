@@ -10,3 +10,6 @@ val PressedCardElevation = 2.dp
 
 /* Field Constants */
 val FieldShape = RoundedCornerShape(8.dp)
+
+/* Space Constants */
+val FABPadding = 90.dp

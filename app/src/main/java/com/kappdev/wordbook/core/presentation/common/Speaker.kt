@@ -34,7 +34,8 @@ import androidx.compose.ui.window.PopupProperties
 fun Speaker(
     textToSpeak: String,
     textToShow: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    speak: (text: String) -> Unit
 ) {
     val (iconSize, updateIconSize) = remember { mutableStateOf(IntSize.Zero) }
     val showMessage = remember { MutableTransitionState(false) }
@@ -50,7 +51,10 @@ fun Speaker(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {
-                        showMessage.targetState = true
+                        if (textToShow.isNotBlank()) {
+                            showMessage.targetState = true
+                        }
+                        speak(textToSpeak)
                     }
                 )
         )
@@ -73,7 +77,10 @@ fun Speaker(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .shadow(elevation = 6.dp, shape = MessageShape)
-                            .background(color = MaterialTheme.colorScheme.surface, shape = MessageShape)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MessageShape
+                            )
                             .padding(8.dp)
                     )
                 }

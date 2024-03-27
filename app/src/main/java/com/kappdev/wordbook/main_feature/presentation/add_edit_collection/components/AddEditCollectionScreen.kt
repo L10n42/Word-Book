@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.domain.util.TextToSpeechHelper
+import com.kappdev.wordbook.core.presentation.common.FABPadding
 import com.kappdev.wordbook.core.presentation.common.InputField
 import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
@@ -81,7 +82,10 @@ fun AddEditCollectionScreen(
     Scaffold(
         topBar = {
             SimpleTopAppBar(
-                title = stringResource(R.string.new_collection),
+                title = when {
+                    (collectionId != null && collectionId > 0) -> stringResource(R.string.edit_collection)
+                    else -> stringResource(R.string.new_collection)
+                },
                 elevate = scrollState.canScrollBackward,
                 onBack = navController::popBackStack
             )
@@ -100,7 +104,7 @@ fun AddEditCollectionScreen(
                 .fillMaxSize()
                 .padding(pv)
                 .verticalScroll(scrollState)
-                .padding(16.dp)
+                .padding(bottom = FABPadding, top = 16.dp, start = 16.dp, end = 16.dp)
         ) {
             InputField(
                 value = viewModel.name,
@@ -125,7 +129,7 @@ fun AddEditCollectionScreen(
             LanguageChooser(
                 label = stringResource(R.string.term_language),
                 selected = viewModel.termLanguage,
-                availableLocales = ttsHelper.availableLanguages,
+                availableLocales = ttsHelper.availableLanguages.value,
                 onChange = viewModel::updateTermLanguage,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -135,7 +139,7 @@ fun AddEditCollectionScreen(
             LanguageChooser(
                 label = stringResource(R.string.definition_language),
                 selected = viewModel.definitionLanguage,
-                availableLocales = ttsHelper.availableLanguages,
+                availableLocales = ttsHelper.availableLanguages.value,
                 onChange = viewModel::updateDefinitionLanguage,
                 modifier = Modifier.fillMaxWidth()
             )

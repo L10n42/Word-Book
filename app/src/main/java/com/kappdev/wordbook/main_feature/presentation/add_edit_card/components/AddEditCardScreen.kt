@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
+import com.kappdev.wordbook.core.presentation.common.FABPadding
 import com.kappdev.wordbook.core.presentation.common.InputField
 import com.kappdev.wordbook.core.presentation.common.LoadingDialog
 import com.kappdev.wordbook.core.presentation.common.VerticalSpace
@@ -83,7 +84,10 @@ fun AddEditCardScreen(
     Scaffold(
         topBar = {
             SimpleTopAppBar(
-                title = stringResource(R.string.new_card),
+                title = when {
+                    (cardId != null && cardId > 0) -> stringResource(R.string.edit_card)
+                    else -> stringResource(R.string.new_card)
+                },
                 elevate = scrollState.canScrollBackward,
                 onBack = navController::popBackStack
             )
@@ -113,7 +117,7 @@ fun AddEditCardScreen(
                 .fillMaxSize()
                 .padding(pv)
                 .verticalScroll(scrollState)
-                .padding(16.dp)
+                .padding(bottom = FABPadding, top = 16.dp, start = 16.dp, end = 16.dp)
         ) {
             CollectionChooser(
                 selected = viewModel.selectedCollection,

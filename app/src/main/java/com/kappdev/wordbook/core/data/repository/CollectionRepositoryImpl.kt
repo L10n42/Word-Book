@@ -7,6 +7,7 @@ import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
 import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import kotlinx.coroutines.flow.Flow
 import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 
 class CollectionRepositoryImpl @Inject constructor(
@@ -30,6 +31,10 @@ class CollectionRepositoryImpl @Inject constructor(
 
     override suspend fun getCollectionName(id: Int): String? {
         return collectionDao.getCollectionName(id)
+    }
+
+    override suspend fun getCollectionLanguage(id: Int): Locale? {
+        return collectionDao.getCollectionLanguage(id)
     }
 
     override fun getCollectionsInfo(): Flow<List<CollectionInfo>> {

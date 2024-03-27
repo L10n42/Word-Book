@@ -58,4 +58,8 @@
     <string name="download">Download</string>
     <string name="crop_image">Crop image</string>
     <string name="downloading">Downloading</string>
+    <string name="edit_collection">Edit Collection</string>
+    <string name="edit_card">Edit Card</string>
+    <string name="no_cards_msg">The collection has no cards yet.</string>
+    <string name="no_collections_msg">You have no collections yet.</string>
 </resources>

@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.AlertSheet
+import com.kappdev.wordbook.core.presentation.common.FABPadding
 import com.kappdev.wordbook.core.presentation.navigation.NavConst
 import com.kappdev.wordbook.core.presentation.navigation.Screen
 import com.kappdev.wordbook.core.presentation.navigation.putArg
@@ -29,6 +30,7 @@ import com.kappdev.wordbook.main_feature.presentation.collections.CollectionShee
 import com.kappdev.wordbook.main_feature.presentation.collections.CollectionsViewModel
 import com.kappdev.wordbook.main_feature.presentation.common.Option
 import com.kappdev.wordbook.main_feature.presentation.common.components.AnimatedFAB
+import com.kappdev.wordbook.main_feature.presentation.common.components.EmptyScreen
 
 @Composable
 fun CollectionsScreen(
@@ -60,7 +62,7 @@ fun CollectionsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(pv),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(bottom = FABPadding, top = 16.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(viewModel.collections, { it.id }) { collectionInfo ->
@@ -84,6 +86,12 @@ fun CollectionsScreen(
                     }
                 )
             }
+        }
+        if (viewModel.collections.isEmpty()) {
+            EmptyScreen(
+                message = stringResource(R.string.no_collections_msg),
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

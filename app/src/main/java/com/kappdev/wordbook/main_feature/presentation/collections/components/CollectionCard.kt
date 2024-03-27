@@ -1,45 +1,44 @@
 package com.kappdev.wordbook.main_feature.presentation.collections.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.rememberAsyncImagePainter
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import com.kappdev.wordbook.R
 import com.kappdev.wordbook.core.presentation.common.CardElevation
 import com.kappdev.wordbook.core.presentation.common.CardShape
@@ -56,6 +55,10 @@ fun CollectionCard(
     onClick: () -> Unit
 ) {
     val backgroundColor = info.color ?: MaterialTheme.colorScheme.surface
+    val textStyle = when {
+        info.backgroundImage != null -> LocalTextStyle.current.copy(color = Color.White, shadow = CardTextShadow)
+        else -> LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface)
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val isCardPressed by interactionSource.collectIsPressedAsState()
 
@@ -89,6 +92,7 @@ fun CollectionCard(
 
         CollectionName(
             name = info.name,
+            textStyle = textStyle,
             modifier = Modifier.constrainAs(name) {
                 start.linkTo(parent.start, 16.dp)
                 top.linkTo(parent.top, 16.dp)
@@ -99,6 +103,7 @@ fun CollectionCard(
 
         CollectionDescription(
             description = info.description,
+            textStyle = textStyle,
             modifier = Modifier.constrainAs(description) {
                 start.linkTo(parent.start, 16.dp)
                 top.linkTo(name.bottom)
@@ -118,6 +123,7 @@ fun CollectionCard(
 
         CardsCount(
             count = info.cardsCount,
+            textStyle = textStyle,
             modifier = Modifier.constrainAs(cardsCount) {
                 end.linkTo(parent.end, 16.dp)
                 bottom.linkTo(parent.bottom, 16.dp)
@@ -126,6 +132,7 @@ fun CollectionCard(
 
         CardMore(
             cardMoreOpened = cardMoreOpened,
+            tint = if (info.backgroundImage != null) Color.White else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.constrainAs(more) {
                 end.linkTo(parent.end)
                 top.linkTo(parent.top)
@@ -135,35 +142,43 @@ fun CollectionCard(
     }
 }
 
+private val CardTextShadow = Shadow(
+    color = Color.Black.copy(0.7f),
+    offset = Offset(0f, 2f),
+    blurRadius = 4f
+)
+
 @Composable
 private fun CollectionName(
     name: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
     Text(
         text = name,
         maxLines = 1,
         fontSize = 18.sp,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.SemiBold,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
+        style = textStyle
     )
 }
 
 @Composable
 private fun CollectionDescription(
     description: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
     Text(
         text = description,
         maxLines = 2,
         fontSize = 16.sp,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Medium,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
+        style = textStyle,
     )
 }
 
@@ -192,7 +207,8 @@ private fun ActionButton(
 @Composable
 private fun CardsCount(
     count: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
     val textToDisplay = when (count) {
         0 -> stringResource(R.string.has_no_cards)
@@ -205,9 +221,9 @@ private fun CardsCount(
         maxLines = 1,
         fontSize = 16.sp,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Medium,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
+        style = textStyle,
     )
 }
 
@@ -216,6 +232,7 @@ private fun CardsCount(
 private fun CardMore(
     cardMoreOpened: Boolean,
     modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) {
     val avdIcon = AnimatedImageVector.animatedVectorResource(R.drawable.avd_more_horiz)
@@ -225,38 +242,25 @@ private fun CardMore(
     ) {
         Icon(
             painter = rememberAnimatedVectorPainter(animatedImageVector = avdIcon, atEnd = cardMoreOpened),
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = tint,
             contentDescription = "Card More"
         )
     }
 }
+
 
 @Composable
 private fun BackgroundImage(
     image: String,
     modifier: Modifier = Modifier
 ) {
-    val painter = rememberAsyncImagePainter(image)
-
-    val transition by animateFloatAsState(
-        targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f,
-        animationSpec = tween(400),
-        label = "Image Display Transition"
+    AsyncImage(
+        model = image,
+        contentScale = ContentScale.Crop,
+        modifier = modifier,
+        contentDescription = "Collection background image",
+        imageLoader = ImageLoader.Builder(LocalContext.current)
+            .crossfade(true)
+            .build()
     )
-
-    Box(
-        modifier.alpha(transition)
-    ) {
-        Image(
-            painter = painter,
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-            contentDescription = "Collection background image"
-        )
-        Box(
-            Modifier
-                .matchParentSize()
-                .background(Color.White.copy(alpha = 0.42f))
-        )
-    }
 }

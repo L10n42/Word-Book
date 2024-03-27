@@ -1,6 +1,6 @@
 package com.kappdev.wordbook.main_feature.presentation.common.components
 
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.material.Icon
@@ -21,26 +21,26 @@ fun AnimatedBackButton(
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    var rotate by remember { mutableStateOf(false) }
+    var targetRotation by remember { mutableStateOf(0f) }
+
     val rotation by animateFloatAsState(
-        targetValue = if (rotate) 180f else 0f,
-        animationSpec = tween(400, easing = LinearEasing),
+        targetValue = targetRotation,
+        animationSpec = tween(300, easing = FastOutLinearInEasing),
         label = "Back Button Rotation"
     )
 
     androidx.compose.material.IconButton(
-        modifier = modifier,
+        modifier = modifier.rotate(rotation),
         enabled = enabled,
         onClick = {
-            rotate = true
+            targetRotation += 360f
             onClick()
         }
     ) {
         Icon(
             imageVector = Icons.Rounded.ArrowBack,
             tint = MaterialTheme.colorScheme.onSurface,
-            contentDescription = null,
-            modifier = Modifier.rotate(rotation)
+            contentDescription = null
         )
     }
 }

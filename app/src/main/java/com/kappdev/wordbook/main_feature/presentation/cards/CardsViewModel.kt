@@ -6,9 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kappdev.wordbook.core.domain.model.Card
+import com.kappdev.wordbook.core.domain.util.TextToSpeechHelper
 import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.DeleteCardById
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionCards
+import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionLanguage
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionName
 import com.kappdev.wordbook.main_feature.domain.use_case.GetCollectionsPreview
 import com.kappdev.wordbook.main_feature.domain.use_case.MoveCardTo
@@ -18,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,9 +28,13 @@ class CardsViewModel @Inject constructor(
     private val getCollectionsPreview: GetCollectionsPreview,
     private val getCollectionCards: GetCollectionCards,
     private val getCollectionName: GetCollectionName,
+    private val getCollectionLanguage: GetCollectionLanguage,
     private val deleteCardById: DeleteCardById,
-    private val moveCardTo: MoveCardTo
+    private val moveCardTo: MoveCardTo,
+    private val textToSpeechHelper: TextToSpeechHelper
 ) : ViewModel() {
+
+    private var collectionLanguage: Locale? = null
 
     var collections by mutableStateOf<List<CollectionPreview>>(emptyList())
         private set
@@ -45,14 +52,21 @@ class CardsViewModel @Inject constructor(
         getCollections()
     }
 
+    fun speak(text: String) {
+        collectionLanguage?.let { language ->
+            textToSpeechHelper.say(text, language)
+        }
+    }
+
     fun getCards(collectionId: Int) {
         cardsJob?.cancel()
         cardsJob = getCollectionCards(collectionId).onEach(::updateCards).launchIn(viewModelScope)
     }
 
-    fun getTitle(collectionId: Int) {
+    fun getCollectionInfo(collectionId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             collectionName = getCollectionName(collectionId)
+            collectionLanguage = getCollectionLanguage(collectionId)
         }
     }
 
@@ -68,7 +82,7 @@ class CardsViewModel @Inject constructor(
         }
     }
 
-    fun getCollections() {
+    private fun getCollections() {
         collectionsJob?.cancel()
         collectionsJob = getCollectionsPreview().onEach{ collections = it }.launchIn(viewModelScope)
     }

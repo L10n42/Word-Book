@@ -4,6 +4,7 @@ import com.kappdev.wordbook.core.domain.model.Collection
 import com.kappdev.wordbook.main_feature.domain.model.CollectionInfo
 import com.kappdev.wordbook.main_feature.domain.model.CollectionPreview
 import kotlinx.coroutines.flow.Flow
+import java.util.Locale
 
 interface CollectionRepository {
 
@@ -12,6 +13,8 @@ interface CollectionRepository {
     suspend fun getCollectionById(id: Int): Collection?
 
     suspend fun getCollectionName(id: Int): String?
+
+    suspend fun getCollectionLanguage(id: Int): Locale?
 
     fun getCollectionsInfo(): Flow<List<CollectionInfo>>
 
